@@ -26,13 +26,13 @@ jobs:
 
       - name: Build EXE
         run: |
-          pyinstaller --onefile --name main main.py
           $env:VERSION = $(git describe --tags --abbrev=0)
-          $NewName = "dist/scholarship_check-${env:VERSION}.exe"
-          Move-Item -Path "dist/main.exe" -Destination $NewName
+          $env:EXE_NAME = "scholarship_check$env:VERSION.exe"
+          pyinstaller --onefile --name main main.py
+          Move-Item -Path "dist/main.exe" -Destination $env:EXE_NAME
 
       - name: Upload Release
         uses: actions/upload-artifact@v2
         with:
-          name: scholarship_check*.exe
-          path: dist/scholarship_check*.exe
+          name: ${{ env.EXE_NAME }}
+          path: dist/${{ env.EXE_NAME }}
