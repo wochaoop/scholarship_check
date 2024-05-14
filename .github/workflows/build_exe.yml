@@ -27,11 +27,10 @@ jobs:
       - name: Build EXE
         run: |
           pyinstaller --onefile --name main main.py
-
-      - name: Rename and Upload Release
-        run: |
           $env:VERSION = $(git describe --tags --abbrev=0)
           Rename-Item -Path dist/main.exe -NewName dist/scholarship_check$env:VERSION.exe
+
+      - name: Upload Release
         uses: actions/upload-artifact@v2
         with:
           name: scholarship_check*.exe
