@@ -26,12 +26,13 @@ jobs:
 
       - name: Build EXE
         run: |
-          $env:VERSION = $(git describe --tags --abbrev=0)
-          pyinstaller --onefile --name scholarship_check$env:VERSION main.py
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          pyinstaller --onefile --name main main.py
 
-      - name: Upload Release
+      - name: Rename and Upload Release
+        run: |
+          $env:VERSION = $(git describe --tags --abbrev=0)
+          Rename-Item -Path dist/main.exe -NewName dist/scholarship_check$env:VERSION.exe
         uses: actions/upload-artifact@v2
         with:
-          name: scholarship_check${{ env.VERSION }}.exe
-          path: dist/scholarship_check${{ env.VERSION }}.exe
+          name: scholarship_check*.exe
+          path: dist/scholarship_check*.exe
