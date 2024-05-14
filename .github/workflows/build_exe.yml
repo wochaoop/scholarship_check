@@ -32,7 +32,8 @@ jobs:
           Move-Item -Path "dist/main.exe" -Destination $env:EXE_NAME
 
       - name: Upload Release
-        uses: actions/upload-artifact@v2
+        uses: softprops/action-gh-release@v1
         with:
-          name: ${{ env.EXE_NAME }}
-          path: dist/${{ env.EXE_NAME }}
+          files: dist/*
+          draft: true
+          token: ${{ secrets.GHCR_PAT }}
