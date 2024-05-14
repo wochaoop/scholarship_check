@@ -39,7 +39,7 @@ jobs:
 
   create-release:
     needs: build-release
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -54,6 +54,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/${{ env.EXE_NAME }}
+          files: dist/*
           draft: true
           token: ${{ secrets.GHCR_PAT }}
