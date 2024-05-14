@@ -28,7 +28,8 @@ jobs:
         run: |
           pyinstaller --onefile --name main main.py
           $env:VERSION = $(git describe --tags --abbrev=0)
-          Rename-Item -Path dist/main.exe -NewName dist/scholarship_check$env:VERSION.exe
+          $NewName = "dist/scholarship_check-${env:VERSION}.exe"
+          Move-Item -Path "dist/main.exe" -Destination $NewName
 
       - name: Upload Release
         uses: actions/upload-artifact@v2
