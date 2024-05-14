@@ -29,9 +29,29 @@ jobs:
           $env:VERSION = $(git describe --tags --abbrev=0)
           $env:EXE_NAME = "scholarship_check$env:VERSION.exe"
           pyinstaller --onefile --name main main.py
-          Move-Item -Path "dist/main.exe" -Destination $env:EXE_NAME
+          Move-Item -Path "dist/main.exe" -Destination "dist/$env:EXE_NAME"
 
-      - name: Upload Release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: EXE
+          path: dist/${{ env.EXE_NAME }}
+
+  create-release:
+    needs: build-release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: EXE
+          path: dist/
+
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: dist/${{ env.EXE_NAME }}
