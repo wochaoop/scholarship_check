@@ -26,8 +26,8 @@ jobs:
 
       - name: Build EXE
         run: |
-          VERSION=$(git describe --tags --abbrev=0)
-          pyinstaller --onefile --name scholarship_check$VERSION main.py
+          $env:VERSION = $(git describe --tags --abbrev=0)
+          pyinstaller --onefile --name scholarship_check$env:VERSION main.py
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Upload Release
