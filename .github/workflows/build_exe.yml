@@ -34,6 +34,6 @@ jobs:
       - name: Upload Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/*
+          files: dist/${{ env.EXE_NAME }}
           draft: true
           token: ${{ secrets.GHCR_PAT }}
