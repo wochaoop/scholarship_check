@@ -14,6 +14,7 @@ determine = 0
 
 def open_file():
     global studentId
+    studentId = ''
     a = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
     b = pd.read_excel(a, header=1)
     studentId = b['学号'].astype(str)
@@ -26,15 +27,20 @@ def query_xlsx(path):
         else:
             if file.endswith(".xlsx"):
                 check.append(os.path.join(path, file))
+            else:
+                print(file+'不是表格文件')
 
 
 def open_folder():
+    global check
+    check = []
     a = filedialog.askdirectory()
     query_xlsx(a)
 
 
 def query_csv():
     global determine
+    determine = 0
     for file in check:
         pending_processing = pd.read_excel(file)
         pending_processing = pending_processing[pending_processing['学号'].astype(str).isin(studentId)]
@@ -60,6 +66,7 @@ def query_csv():
         print('全部通过')
     else:
         print('有{}处问题'.format(determine))
+
 
 
 root_window = tk.Tk()
