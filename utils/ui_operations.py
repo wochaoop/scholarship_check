@@ -30,3 +30,16 @@ def create_buttons(root_window, output_text, open_file, open_folder, query_csv):
     button3 = ttk.Button(root_window, text='开始核查', command=lambda: query_csv(output_text),
                          style='Custom.TButton')  # 使用自定义样式
     button3.grid(row=3, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
+
+
+def print_to_text(output_text, s):
+    output_text.config(state='normal')  # 允许写入
+    output_text.insert('end', s + '\n')  # 在Text控件的末尾插入文本
+    output_text.config(state='disabled')  # 禁止写入
+    output_text.see('end')  # 自动滚动到Text控件的末尾
+
+
+def clear_text(output_text):
+    output_text.config(state='normal')  # 允许写入
+    output_text.delete('1.0', 'end')  # 清空Text控件
+    output_text.config(state='disabled')  # 禁止写入

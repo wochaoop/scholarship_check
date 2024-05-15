@@ -4,15 +4,10 @@ import re
 import pandas as pd
 from tkinter import filedialog
 
+from utils.ui_operations import print_to_text, clear_text
+
 check_files = []
 student_ids = ''
-
-
-def print_to_text(output_text, s):
-    output_text.config(state='normal')  # 允许写入
-    output_text.insert('end', s + '\n')  # 在Text控件的末尾插入文本
-    output_text.config(state='disabled')  # 禁止写入
-    output_text.see('end')  # 自动滚动到Text控件的末尾
 
 
 def query_xlsx(path):
@@ -37,6 +32,7 @@ def open_file(output_text):
     if not file_path.endswith((".xlsx", ".xls", ".xlsm", ".xlsb")):
         print_to_text(output_text, "你选择的文件不是Excel文件")
         return
+    print_to_text(output_text, f"你选择的文件是: {file_path}")
     try:
         data = pd.read_excel(file_path, header=1)
         student_ids = data['学号'].astype(str)
@@ -50,10 +46,12 @@ def open_folder(output_text):
     if not folder_path:
         print_to_text(output_text, "你没有选择文件夹")
         return
+    print_to_text(output_text, f"你选择的文件夹是: {folder_path}")
     query_xlsx(folder_path)
 
 
 def query_excel(output_text):
+    clear_text(output_text)  # 在开始核查之前清空Text控件
     issue_count = 0
     error_count = 0
     if not check_files:
