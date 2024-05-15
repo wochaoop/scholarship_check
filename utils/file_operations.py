@@ -1,6 +1,5 @@
 import os
 import re
-import warnings
 
 import pandas as pd
 from tkinter import filedialog
@@ -22,7 +21,7 @@ def query_xlsx(path):
         if os.path.isdir(os.path.join(path, file)):
             query_xlsx(os.path.join(path, file))
         else:
-            if file.endswith(".xlsx"):
+            if file.endswith(".xlsx") or file.endswith(".xls") or file.endswith(".xlsm") or file.endswith(".xlsb"):
                 check_files.append(os.path.join(path, file))
 
 
@@ -49,13 +48,12 @@ def open_folder(output_text):
     query_xlsx(folder_path)
 
 
-def query_csv(output_text):
+def query_excel(output_text):
     global issue_count
     issue_count = 0
     if not check_files:
         print_to_text(output_text, "你没有选择任何文件（夹）进行核查")
         return
-    warnings.filterwarnings('ignore', category=UserWarning)
     for file in check_files:
         try:
             pending_processing = pd.read_excel(file)

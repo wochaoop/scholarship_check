@@ -1,9 +1,11 @@
+import warnings
 from concurrent.futures import ThreadPoolExecutor
-from utils.file_operations import open_file, open_folder, query_csv
+from utils.file_operations import open_file, open_folder, query_excel
 from utils.ui_operations import create_window, create_text_widget, create_buttons
 
 
 def main():
+    warnings.filterwarnings('ignore', category=UserWarning)
     root_window = create_window()
     output_text = create_text_widget(root_window)
 
@@ -15,7 +17,7 @@ def main():
     create_buttons(root_window, output_text,
                    lambda _: executor.submit(open_file, output_text),
                    lambda _: executor.submit(open_folder, output_text),
-                   lambda _: executor.submit(query_csv, output_text))
+                   lambda _: executor.submit(query_excel, output_text))
 
     root_window.mainloop()
 
