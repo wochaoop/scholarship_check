@@ -1,6 +1,8 @@
 import os
 import re
 import tkinter as tk
+from tkinter import ttk
+import ttkbootstrap as ttks
 import warnings
 from tkinter import filedialog
 import pandas as pd
@@ -11,8 +13,12 @@ check_files = []
 student_ids = ''
 issue_count = 0
 
-root_window = tk.Tk()
+style = ttks.Style('darkly')
+root_window = style.master
 root_window.title('成绩核查')
+
+# 创建新的样式
+style.configure('Custom.TButton', borderwidth=2, relief='raised')
 
 # 使用grid布局管理器
 root_window.rowconfigure(0, weight=1)
@@ -96,13 +102,13 @@ def query_csv():
         print_to_text(f'有{issue_count}处问题')
 
 
-button = tk.Button(text='上传核查表Excel文件', command=lambda: open_file(), font=('Arial', 12))  # 设置字体和大小
+button = ttk.Button(text='上传核查表Excel文件', command=lambda: open_file(), style='Custom.TButton')  # 使用自定义样式
 button.grid(row=1, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
 
-button2 = tk.Button(text='上传包含各班级的Excel成绩表的文件夹', command=lambda: open_folder(), font=('Arial', 12))  # 设置字体和大小
+button2 = ttk.Button(text='上传包含各班级的Excel成绩表的文件夹', command=lambda: open_folder(), style='Custom.TButton')  # 使用自定义样式
 button2.grid(row=2, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
 
-button3 = tk.Button(text='开始核查', command=lambda: query_csv(), font=('Arial', 12))  # 设置字体和大小
+button3 = ttk.Button(text='开始核查', command=lambda: query_csv(), style='Custom.TButton')  # 使用自定义样式
 button3.grid(row=3, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
 
 root_window.mainloop()
