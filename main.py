@@ -13,10 +13,13 @@ issue_count = 0
 
 root_window = tk.Tk()
 root_window.title('成绩核查')
-root_window.geometry('600x500')
 
-output_text = tk.Text(root_window, state='disabled')  # 创建一个只读的Text控件
-output_text.pack()
+# 使用grid布局管理器
+root_window.rowconfigure(0, weight=1)
+root_window.columnconfigure(0, weight=1)
+
+output_text = tk.Text(root_window, state='disabled', font=('Arial', 12))  # 创建一个只读的Text控件，并设置字体和大小
+output_text.grid(row=0, column=0, sticky='nsew')
 
 
 def print_to_text(s):
@@ -93,13 +96,13 @@ def query_csv():
         print_to_text(f'有{issue_count}处问题')
 
 
-button = tk.Button(text='上传核查表Excel文件', command=lambda: open_file())
-button.pack()
+button = tk.Button(text='上传核查表Excel文件', command=lambda: open_file(), font=('Arial', 12))  # 设置字体和大小
+button.grid(row=1, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
 
-button2 = tk.Button(text='上传包含各班级的Excel成绩表的文件夹', command=lambda: open_folder())
-button2.pack()
+button2 = tk.Button(text='上传包含各班级的Excel成绩表的文件夹', command=lambda: open_folder(), font=('Arial', 12))  # 设置字体和大小
+button2.grid(row=2, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
 
-button3 = tk.Button(text='开始核查', command=lambda: query_csv())
-button3.pack()
+button3 = tk.Button(text='开始核查', command=lambda: query_csv(), font=('Arial', 12))  # 设置字体和大小
+button3.grid(row=3, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
 
 root_window.mainloop()
