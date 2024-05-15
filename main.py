@@ -11,6 +11,20 @@ check_files = []
 student_ids = ''
 issue_count = 0
 
+root_window = tk.Tk()
+root_window.title('成绩核查')
+root_window.geometry('600x500')
+
+output_text = tk.Text(root_window, state='disabled')  # 创建一个只读的Text控件
+output_text.pack()
+
+
+def print_to_text(s):
+    output_text.config(state='normal')  # 允许写入
+    output_text.insert('end', s + '\n')  # 在Text控件的末尾插入文本
+    output_text.config(state='disabled')  # 禁止写入
+    output_text.see('end')  # 自动滚动到Text控件的末尾
+
 
 def query_xlsx(path):
     for file in os.listdir(path):
@@ -26,20 +40,20 @@ def open_file():
     check_files.clear()  # 清空check_files列表
     file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
     if not file_path:
-        print("你没有选择文件")
+        print_to_text("你没有选择文件")
         return
     try:
         data = pd.read_excel(file_path, header=1)
         student_ids = data['学号'].astype(str)
     except Exception as e:
-        print(f"在处理文件{file_path}时出现了错误: {e}")
+        print_to_text(f"在处理文件{file_path}时出现了错误: {e}")
 
 
 def open_folder():
     check_files.clear()  # 清空check_files列表
     folder_path = filedialog.askdirectory()
     if not folder_path:
-        print("你没有选择文件夹")
+        print_to_text("你没有选择文件夹")
         return
     query_xlsx(folder_path)
 
@@ -48,7 +62,7 @@ def query_csv():
     global issue_count
     issue_count = 0
     if not check_files:
-        print("你没有选择任何文件（夹）进行核查")
+        print_to_text("你没有选择任何文件（夹）进行核查")
         return
     for file in check_files:
         try:
@@ -67,22 +81,17 @@ def query_csv():
                             rows[column] = 60
                         if not pd.isna(rows[column]):
                             if rows[column] < 70:
-                                print(name, student_id, team)
-                                print(column, rows[column])
+                                print_to_text(f"{name} {student_id} {team}\n{column} {rows[column]}")
                                 issue_count += 1
                             else:
                                 issue_count += 0
         except Exception as e:
-            print(f"在处理文件{file}时出现了错误: {e}")
+            print_to_text(f"在处理文件{file}时出现了错误: {e}")
     if issue_count == 0:
-        print('全部通过')
+        print_to_text('全部通过')
     else:
-        print('有{}处问题'.format(issue_count))
+        print_to_text(f'有{issue_count}处问题')
 
-
-root_window = tk.Tk()
-root_window.title('成绩核查')
-root_window.geometry('600x500')
 
 button = tk.Button(text='上传核查表Excel文件', command=lambda: open_file())
 button.pack()
