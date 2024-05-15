@@ -28,8 +28,8 @@ jobs:
         run: |
           $env:VERSION = $(git describe --tags --abbrev=0)
           $env:EXE_NAME = "scholarship_check-$env:VERSION.exe"
-          pyinstaller --onefile --name main main.py
-          Move-Item -Path "dist/main.exe" -Destination "dist/$env:EXE_NAME"
+          pyinstaller --onefile -w --name main --icon=favicon.ico main.py
+          Move-Item -Path "dist/main.exe" -Destination "dist/$env:EXE_NAME" -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2
