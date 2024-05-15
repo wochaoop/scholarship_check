@@ -1,5 +1,7 @@
 import os
 import re
+import warnings
+
 import pandas as pd
 from tkinter import filedialog
 
@@ -53,6 +55,7 @@ def query_csv(output_text):
     if not check_files:
         print_to_text(output_text, "你没有选择任何文件（夹）进行核查")
         return
+    warnings.filterwarnings('ignore', category=UserWarning)
     for file in check_files:
         try:
             pending_processing = pd.read_excel(file)
@@ -70,7 +73,12 @@ def query_csv(output_text):
                             rows[column] = 60
                         if not pd.isna(rows[column]):
                             if rows[column] < 70:
-                                print_to_text(output_text, f"{name} {student_id} {team}\n{column} {rows[column]}")
+                                print_to_text(output_text, f"学生姓名: {name}\n"
+                                                           f"学生学号: {student_id}\n"
+                                                           f"班级: {team}\n"
+                                                           f"科目: {column}\n"
+                                                           f"成绩: {rows[column]}\n"
+                                                           f"-------------------------\n")
                                 issue_count += 1
                             else:
                                 issue_count += 0
