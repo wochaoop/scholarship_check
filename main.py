@@ -12,8 +12,18 @@ student_ids = ''
 issue_count = 0
 
 
+def query_xlsx(path):
+    for file in os.listdir(path):
+        if os.path.isdir(os.path.join(path, file)):
+            query_xlsx(os.path.join(path, file))
+        else:
+            if file.endswith(".xlsx"):
+                check_files.append(os.path.join(path, file))
+
+
 def open_file():
     global student_ids
+    check_files.clear()  # 清空check_files列表
     file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
     if not file_path:
         print("你没有选择文件")
@@ -25,16 +35,8 @@ def open_file():
         print(f"在处理文件{file_path}时出现了错误: {e}")
 
 
-def query_xlsx(path):
-    for file in os.listdir(path):
-        if os.path.isdir(os.path.join(path, file)):
-            query_xlsx(os.path.join(path, file))
-        else:
-            if file.endswith(".xlsx"):
-                check_files.append(os.path.join(path, file))
-
-
 def open_folder():
+    check_files.clear()  # 清空check_files列表
     folder_path = filedialog.askdirectory()
     if not folder_path:
         print("你没有选择文件夹")
@@ -45,6 +47,9 @@ def open_folder():
 def query_csv():
     global issue_count
     issue_count = 0
+    if not check_files:
+        print("你没有选择任何文件（夹）进行核查")
+        return
     for file in check_files:
         try:
             pending_processing = pd.read_excel(file)
