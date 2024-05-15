@@ -21,6 +21,9 @@ def main():
 
     root_window.mainloop()
 
+    # 确保所有的任务都已经完成并且线程池已经被关闭
+    executor.shutdown(wait=True)
+
 
 if __name__ == "__main__":
     main()

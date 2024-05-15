@@ -6,7 +6,6 @@ from tkinter import filedialog
 
 check_files = []
 student_ids = ''
-issue_count = 0
 
 
 def print_to_text(output_text, s):
@@ -32,6 +31,12 @@ def open_file(output_text):
     if not file_path:
         print_to_text(output_text, "你没有选择文件")
         return
+    if not os.path.isfile(file_path):
+        print_to_text(output_text, "你选择的文件不存在")
+        return
+    if not file_path.endswith((".xlsx", ".xls", ".xlsm", ".xlsb")):
+        print_to_text(output_text, "你选择的文件不是Excel文件")
+        return
     try:
         data = pd.read_excel(file_path, header=1)
         student_ids = data['学号'].astype(str)
@@ -49,8 +54,8 @@ def open_folder(output_text):
 
 
 def query_excel(output_text):
-    global issue_count
     issue_count = 0
+    error_count = 0
     if not check_files:
         print_to_text(output_text, "你没有选择任何文件（夹）进行核查")
         return
@@ -81,7 +86,10 @@ def query_excel(output_text):
                             else:
                                 issue_count += 0
         except Exception as e:
+            error_count += 1
             print_to_text(output_text, f"在处理文件{file}时出现了错误: {e}")
+    if error_count > 0:
+        print_to_text(output_text, f'有{error_count}个文件无法处理')
     if issue_count == 0:
         print_to_text(output_text, '全部通过')
     else:
