@@ -27,7 +27,7 @@ def query_xlsx(path):
 def open_file(output_text):
     global student_ids
     check_files.clear()  # 清空check_files列表
-    file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
+    file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx;*.xls;*.xlsm;*.xlsb")])
     if not file_path:
         print_to_text(output_text, "你没有选择文件")
         return

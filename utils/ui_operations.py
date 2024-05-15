@@ -21,7 +21,7 @@ def create_text_widget(root_window):
 def create_buttons(root_window, output_text, open_file, open_folder, query_csv):
     style = ttk.Style()
     style.configure('Custom.TButton', borderwidth=2, relief='raised')
-    button = ttk.Button(root_window, text='上传核查表Excel文件', command=lambda: open_file(output_text),
+    button = ttk.Button(root_window, text='上传一个Excel汇总表文件', command=lambda: open_file(output_text),
                         style='Custom.TButton')  # 使用自定义样式
     button.grid(row=1, column=0, sticky='nsew')  # 使用grid布局管理器，并使得Button控件填充其单元格
     button2 = ttk.Button(root_window, text='上传包含各班级的Excel成绩表的文件夹',
