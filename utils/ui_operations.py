@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk
 import ttkbootstrap as ttks
@@ -43,3 +44,24 @@ def clear_text(output_text):
     output_text.config(state='normal')  # 允许写入
     output_text.delete('1.0', 'end')  # 清空Text控件
     output_text.config(state='disabled')  # 禁止写入
+
+
+def print_folder_tree(output_text, folder_path, prefix=''):
+    files = []
+    if os.path.isdir(folder_path):
+        files = os.listdir(folder_path)
+    else:
+        files.append(folder_path)
+
+    for i in range(min(len(files), 3)):  # 只列出前三个文件或子文件夹
+        if i == len(files) - 1 or i == 2:  # 如果是最后一个或者已经列出了三个
+            print_to_text(output_text, f"{prefix}└─{files[i]}")
+            if os.path.isdir(os.path.join(folder_path, files[i])):
+                print_folder_tree(output_text, os.path.join(folder_path, files[i]), prefix + "    ")
+        else:
+            print_to_text(output_text, f"{prefix}├─{files[i]}")
+            if os.path.isdir(os.path.join(folder_path, files[i])):
+                print_folder_tree(output_text, os.path.join(folder_path, files[i]), prefix + "│   ")
+
+    if len(files) > 3:  # 如果文件或子文件夹数超过三个，输出省略号
+        print_to_text(output_text, f"{prefix}├─...")
