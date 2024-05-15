@@ -27,7 +27,7 @@ jobs:
       - name: Build EXE
         run: |
           $env:VERSION = $(git describe --tags --abbrev=0)
-          $env:EXE_NAME = "scholarship_check$env:VERSION.exe"
+          $env:EXE_NAME = "scholarship_check-$env:VERSION.exe"
           pyinstaller --onefile --name main main.py
           Move-Item -Path "dist/main.exe" -Destination "dist/$env:EXE_NAME"
 
