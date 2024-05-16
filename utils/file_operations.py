@@ -136,6 +136,9 @@ def query_excel(output_text):
                                                    f"学生没有选择任何一个选修科目\n"
                                                    f"----------------------------------------------------------------------------")
                         issue_count += 1
+            else:
+                print_to_text(output_text, f"在文件{file}的前20行中未找到期望的列名")
+                error_count += 1
         except FileNotFoundError:
             print_to_text(output_text, f"在处理文件{file}时出现了错误: 文件不存在")
             error_count += 1
@@ -151,27 +154,24 @@ def query_excel(output_text):
         except Exception as e:
             print_to_text(output_text, f"在处理文件{file}时出现了错误: {e}")
             error_count += 1
-        not_found_students = [student_id for student_id in student_ids if
-                              student_id not in found_students_set]  # 找出在所有文件中都没有找到的学生
-        not_found_count = len(not_found_students)
-        for student_id in not_found_students:
-            print_to_text(output_text, f"学生学号: {student_id} 在所有文件中都没有找到")
-        if error_count > 0:
-            print_to_text(output_text, f'有 {error_count} 个文件无法处理')
-        if not_found_count > 0:
-            print_to_text(output_text, f'有 {not_found_count} 个学生没有找到')
-        if issue_count == 0:
-            print_to_text(output_text, '程序运行完毕，所有学生的成绩都满足要求')
-        else:
-            print_to_text(output_text, f'有 {issue_count} 处学生的成绩不满足要求')
+    not_found_students = [student_id for student_id in student_ids if
+                          student_id not in found_students_set]  # 找出在所有文件中都没有找到的学生
+    not_found_count = len(not_found_students)
+    for student_id in not_found_students:
+        print_to_text(output_text, f"学生学号: {student_id} 在所有文件中都没有找到")
+    if error_count > 0:
+        print_to_text(output_text, f'有 {error_count} 个文件无法处理')
+    if not_found_count > 0:
+        print_to_text(output_text, f'有 {not_found_count} 个学生没有找到')
+    if issue_count == 0:
+        print_to_text(output_text, '程序运行完毕，所有学生的成绩都满足要求')
     else:
-        print_to_text(output_text, "未在文件的前20行中找到期望的列名")
+        print_to_text(output_text, f'有 {issue_count} 处学生的成绩不满足要求')
 
 
 def find_header_row(file_path, expected_columns):
     for i in range(20):  # 遍历前20行
         df = pd.read_excel(file_path, header=i)
         if set(expected_columns).issubset(df.columns):
-            print(f"在第 {i} 行")
             return i
     return None
