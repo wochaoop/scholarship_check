@@ -8,7 +8,7 @@ import pandas as pd
 warnings.filterwarnings('ignore', category=UserWarning)
 
 summary_files = []
-summary_data = ''
+summary_data = []
 
 
 def save_summary_path(path):
@@ -30,12 +30,13 @@ def open_summary():
         return
     save_summary_path(folder_summary)
     for path in summary_files:
-        try:
-            data = pd.read_excel(path, header=5)
-            print(data['学号'].astype(int))
-            print(data['班级'].astype(str))
-        except Exception as e:
-            print(e)
+        data = pd.read_excel(path)
+        print(data.columns)
+        # for index, row in data.iterrows():
+        #     if pd.isnull(row["学号"]):
+        #         pass
+        #     else:
+        #         print(row["学号"].astype(int), row["姓名"].astype(str), row["班级"].astype(str))
 
 
 window = tk.Tk()
