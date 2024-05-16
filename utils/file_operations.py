@@ -35,6 +35,7 @@ def open_file(output_text):
         return
     print_to_text(output_text, f"你选择的文件是: {os.path.basename(file_path)}")
     try:
+        # 读取汇总表
         data = pd.read_excel(file_path, header=1)
         student_ids = data['学号'].astype(str).str.strip().str.replace(r'\W+', '')  # 移除头尾空格和tab，移除特殊符号
     except Exception as e:
@@ -64,7 +65,8 @@ def query_excel(output_text):
         return
     for file in check_files:
         try:
-            pending_processing = pd.read_excel(file)
+            # 读取各班级成绩表
+            pending_processing = pd.read_excel(file, header=0)
             found_students = pending_processing['学号'].astype(str)
             found_students_set.update(found_students.values)  # 将在当前文件中找到的学生添加到集合中
             pending_processing = pending_processing[found_students.isin(student_ids)]
@@ -86,6 +88,7 @@ def query_excel(output_text):
                                                            f"班级: {team}\n"
                                                            f"科目: {column}\n"
                                                            f"成绩: {rows[column]}\n"
+                                                           f"学生的成绩不满足要求\n"
                                                            f"-------------------------\n")
                                 issue_count += 1
                             else:
@@ -96,15 +99,16 @@ def query_excel(output_text):
         except Exception as e:
             print_to_text(output_text, f"在处理文件{file}时出现了错误: {e}")
             error_count += 1
-    not_found_students = [student_id for student_id in student_ids if student_id not in found_students_set]  # 找出在所有文件中都没有找到的学生
+    not_found_students = [student_id for student_id in student_ids if
+                          student_id not in found_students_set]  # 找出在所有文件中都没有找到的学生
     not_found_count = len(not_found_students)
     for student_id in not_found_students:
         print_to_text(output_text, f"学生学号: {student_id} 在所有文件中都没有找到")
     if error_count > 0:
-        print_to_text(output_text, f'有{error_count}个文件无法处理')
+        print_to_text(output_text, f'有 {error_count} 个文件无法处理')
     if not_found_count > 0:
-        print_to_text(output_text, f'有{not_found_count}个学生没有找到')
+        print_to_text(output_text, f'有 {not_found_count} 个学生没有找到')
     if issue_count == 0:
-        print_to_text(output_text, '全部通过')
+        print_to_text(output_text, '程序运行完毕，所有学生的成绩都满足要求')
     else:
-        print_to_text(output_text, f'有{issue_count}处问题')
+        print_to_text(output_text, f'有 {issue_count} 处学生的成绩不满足要求')
