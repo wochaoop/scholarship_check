@@ -8,6 +8,7 @@ from utils.ui_operations import print_to_text, clear_text, print_folder_tree
 
 check_files = []
 student_ids = ''
+file_selected = False  # 添加一个全局变量来跟踪用户是否已经选择了一个文件或文件夹
 
 
 def query_xlsx(path):
@@ -20,12 +21,12 @@ def query_xlsx(path):
 
 
 def open_file(output_text):
-    global student_ids
-    check_files.clear()  # 清空check_files列表
+    global student_ids, file_selected
     file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx;*.xls;*.xlsm;*.xlsb")])
     if not file_path:
         print_to_text(output_text, "你没有选择文件")
         return
+    file_selected = True  # 用户已经选择了一个文件
     if not os.path.isfile(file_path):
         print_to_text(output_text, "你选择的文件不存在")
         return
@@ -41,22 +42,24 @@ def open_file(output_text):
 
 
 def open_folder(output_text):
-    check_files.clear()  # 清空check_files列表
+    global file_selected
     folder_path = filedialog.askdirectory()
     if not folder_path:
         print_to_text(output_text, "你没有选择文件夹")
         return
+    file_selected = True  # 用户已经选择了一个文件夹
     print_to_text(output_text, f"你选择的文件夹的结构预览: {os.path.basename(folder_path)}")
     print_folder_tree(output_text, folder_path)
     query_xlsx(folder_path)
 
 
 def query_excel(output_text):
+    global file_selected
     clear_text(output_text)  # 在开始核查之前清空Text控件
     issue_count = 0
     error_count = 0
     found_students_set = set()  # 创建一个集合来存储在所有文件中找到的学生
-    if not check_files:
+    if not file_selected:
         print_to_text(output_text, "你没有选择任何文件（夹）进行核查")
         return
     for file in check_files:
