@@ -77,18 +77,55 @@ def query_excel(output_text):
                 for column in pending_processing.columns:
                     match = re.search(r'\[(\d+)]$', column)
                     if match:
-                        if rows[column] in ['优秀', '良好']:
-                            rows[column] = 100
-                        if rows[column] in ['及格']:
-                            rows[column] = 60
-                        if not pd.isna(rows[column]):
+                        if '选修' in column:
+                            if not pd.isna(rows[column]):
+                                if rows[column] in ['优秀', '良好']:
+                                    rows[column] = 80
+                                elif rows[column] in ['及格']:
+                                    rows[column] = 60
+                                elif rows[column] in ['不及格']:
+                                    rows[column] = 50
+                                else:
+                                    # 否则，将分数转换为数值类型
+                                    rows[column] = pd.to_numeric(rows[column], errors='coerce')
+                                # 如果分数是NaN，就视为0分
+                                if pd.isna(rows[column]):
+                                    rows[column] = 0
+                                # 如果科目的分数小于70，就将这个学生添加到新的DataFrame中
+                                if rows[column] < 70:
+                                    print_to_text(output_text, f"学生姓名: {name}\n"
+                                                               f"学生学号: {student_id}\n"
+                                                               f"班级: {team}\n"
+                                                               f"科目: {column}\n"
+                                                               f"成绩: {rows[column]}\n"
+                                                               f"学生的选修科目成绩不满足要求\n"
+                                                               f"-------------------------\n")
+                                    issue_count += 1
+                                else:
+                                    issue_count += 0
+                        else:
+                            # 这是一个必修科目
+                            if not pd.isna(rows[column]):
+                                if rows[column] in ['优秀', '良好']:
+                                    rows[column] = 80
+                                elif rows[column] in ['及格']:
+                                    rows[column] = 60
+                                elif rows[column] in ['不及格']:
+                                    rows[column] = 50
+                            else:
+                                # 否则，将分数转换为数值类型
+                                rows[column] = pd.to_numeric(rows[column], errors='coerce')
+                            # 如果分数是NaN，就视为0分
+                            if pd.isna(rows[column]):
+                                rows[column] = 0
+                            # 如果科目的分数小于70，就将这个学生添加到新的DataFrame中
                             if rows[column] < 70:
                                 print_to_text(output_text, f"学生姓名: {name}\n"
                                                            f"学生学号: {student_id}\n"
                                                            f"班级: {team}\n"
                                                            f"科目: {column}\n"
                                                            f"成绩: {rows[column]}\n"
-                                                           f"学生的成绩不满足要求\n"
+                                                           f"学生的必修科目成绩不满足要求\n"
                                                            f"-------------------------\n")
                                 issue_count += 1
                             else:
