@@ -74,62 +74,69 @@ def query_excel(output_text):
                 name = rows['姓名']
                 student_id = rows['学号']
                 team = rows['班级']
+                elective_exists = False  # 用于跟踪是否存在选修科目
+                elective_chosen = False  # 用于跟踪学生是否选择了至少一个选修科目
                 for column in pending_processing.columns:
                     match = re.search(r'\[(\d+)]$', column)
                     if match:
+                        if rows[column] in ['优秀', '良好']:
+                            rows[column] = 80
+                        elif rows[column] in ['及格']:
+                            rows[column] = 60
+                        elif rows[column] in ['不及格']:
+                            rows[column] = 50
+                        else:
+                            rows[column] = pd.to_numeric(rows[column], errors='coerce')
                         if '选修' in column:
+                            # 这是一个选修科目
+                            elective_exists = True
                             if not pd.isna(rows[column]):
-                                if rows[column] in ['优秀', '良好']:
-                                    rows[column] = 80
-                                elif rows[column] in ['及格']:
-                                    rows[column] = 60
-                                elif rows[column] in ['不及格']:
-                                    rows[column] = 50
-                                else:
-                                    # 否则，将分数转换为数值类型
-                                    rows[column] = pd.to_numeric(rows[column], errors='coerce')
-                                # 如果分数是NaN，就视为0分
+                                elective_chosen = True
+                                # 如果分数是NaN，将其替换为 100
                                 if pd.isna(rows[column]):
-                                    rows[column] = 0
-                                # 如果科目的分数小于70，就将这个学生添加到新的DataFrame中
+                                    rows[column] = 100
                                 if rows[column] < 70:
                                     print_to_text(output_text, f"学生姓名: {name}\n"
                                                                f"学生学号: {student_id}\n"
                                                                f"班级: {team}\n"
-                                                               f"科目: {column}\n"
-                                                               f"成绩: {rows[column]}\n"
-                                                               f"学生的选修科目成绩不满足要求\n"
-                                                               f"-------------------------\n")
+                                                               f"选修科目分数不满足条件: {column}\n"
+                                                               f"分数: {rows[column]}\n"
+                                                               f"----------------------------------------------------------------------------")
                                     issue_count += 1
                                 else:
                                     issue_count += 0
                         else:
                             # 这是一个必修科目
                             if not pd.isna(rows[column]):
-                                if rows[column] in ['优秀', '良好']:
-                                    rows[column] = 80
-                                elif rows[column] in ['及格']:
-                                    rows[column] = 60
-                                elif rows[column] in ['不及格']:
-                                    rows[column] = 50
-                            else:
-                                # 否则，将分数转换为数值类型
-                                rows[column] = pd.to_numeric(rows[column], errors='coerce')
-                            # 如果分数是NaN，就视为0分
-                            if pd.isna(rows[column]):
-                                rows[column] = 0
-                            # 如果科目的分数小于70，就将这个学生添加到新的DataFrame中
-                            if rows[column] < 70:
-                                print_to_text(output_text, f"学生姓名: {name}\n"
-                                                           f"学生学号: {student_id}\n"
-                                                           f"班级: {team}\n"
-                                                           f"科目: {column}\n"
-                                                           f"成绩: {rows[column]}\n"
-                                                           f"学生的必修科目成绩不满足要求\n"
-                                                           f"-------------------------\n")
-                                issue_count += 1
-                            else:
-                                issue_count += 0
+                                # 如果分数是NaN，将其替换为 0
+                                if pd.isna(rows[column]):
+                                    rows[column] = 0
+                                if rows[column] < 70:
+                                    print_to_text(output_text, f"学生姓名: {name}\n"
+                                                               f"学生学号: {student_id}\n"
+                                                               f"班级: {team}\n"
+                                                               f"必修科目分数不满足条件: {column}\n"
+                                                               f"分数: {rows[column]}\n"
+                                                               f"----------------------------------------------------------------------------")
+                                    issue_count += 1
+                                else:
+                                    issue_count += 0
+                if elective_exists and not elective_chosen:
+                    print_to_text(output_text, f"学生姓名: {name}\n"
+                                               f"学生学号: {student_id}\n"
+                                               f"班级: {team}\n"
+                                               f"学生没有选择任何一个选修科目\n"
+                                               f"----------------------------------------------------------------------------")
+                    issue_count += 1
+        except FileNotFoundError:
+            print_to_text(output_text, f"在处理文件{file}时出现了错误: 文件不存在")
+            error_count += 1
+        except pd.errors.EmptyDataError:
+            print_to_text(output_text, f"在处理文件{file}时出现了错误: 文件为空")
+            error_count += 1
+        except pd.errors.ParserError:
+            print_to_text(output_text, f"在处理文件{file}时出现了错误: 文件格式错误")
+            error_count += 1
         except PermissionError:
             print_to_text(output_text, f"在处理文件{file}时出现了错误: 文件被占用。请关闭所有打开的Excel表格并重试")
             error_count += 1
