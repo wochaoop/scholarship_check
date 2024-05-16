@@ -14,8 +14,19 @@ def create_window():
 
 
 def create_text_widget(root_window):
-    output_text = tk.Text(root_window, state='disabled', font=('Arial', 12))  # 创建一个只读的Text控件，并设置字体和大小
+    output_frame = tk.Frame(root_window)  # 创建一个Frame控件来包含Text控件和Scrollbar控件
+    output_frame.grid(row=0, column=0, sticky='nsew')
+    output_frame.columnconfigure(0, weight=1)
+    output_frame.rowconfigure(0, weight=1)
+
+    output_text = tk.Text(output_frame, state='disabled', font=('Arial', 12))  # 创建一个只读的Text控件，并设置字体和大小
     output_text.grid(row=0, column=0, sticky='nsew')
+
+    scrollbar = tk.Scrollbar(output_frame, command=output_text.yview)  # 创建一个Scrollbar控件，并将其与Text控件关联起来
+    scrollbar.grid(row=0, column=1, sticky='ns')
+
+    output_text['yscrollcommand'] = scrollbar.set  # 将Text控件的yscrollcommand选项设置为Scrollbar控件的set方法，这样当Text控件滚动时，Scrollbar控件也会跟着滚动
+
     return output_text
 
 
