@@ -35,7 +35,7 @@ def open_file(output_text):
     print_to_text(output_text, f"你选择的文件是: {os.path.basename(file_path)}")
     try:
         data = pd.read_excel(file_path, header=1)
-        student_ids = data['学号'].astype(str)
+        student_ids = data['学号'].astype(str).str.strip().str.replace(r'\W+', '')  # 移除头尾空格和tab，移除特殊符号
     except Exception as e:
         print_to_text(output_text, f"在处理文件{file_path}时出现了错误: {e}")
 
@@ -55,13 +55,16 @@ def query_excel(output_text):
     clear_text(output_text)  # 在开始核查之前清空Text控件
     issue_count = 0
     error_count = 0
+    found_students_set = set()  # 创建一个集合来存储在所有文件中找到的学生
     if not check_files:
         print_to_text(output_text, "你没有选择任何文件（夹）进行核查")
         return
     for file in check_files:
         try:
             pending_processing = pd.read_excel(file)
-            pending_processing = pending_processing[pending_processing['学号'].astype(str).isin(student_ids)]
+            found_students = pending_processing['学号'].astype(str)
+            found_students_set.update(found_students.values)  # 将在当前文件中找到的学生添加到集合中
+            pending_processing = pending_processing[found_students.isin(student_ids)]
             for index, rows in pending_processing.iterrows():
                 name = rows['姓名']
                 student_id = rows['学号']
@@ -84,11 +87,20 @@ def query_excel(output_text):
                                 issue_count += 1
                             else:
                                 issue_count += 0
-        except Exception as e:
+        except PermissionError:
+            print_to_text(output_text, f"在处理文件{file}时出现了错误: 文件被占用。请关闭所有打开的Excel表格并重试")
             error_count += 1
+        except Exception as e:
             print_to_text(output_text, f"在处理文件{file}时出现了错误: {e}")
+            error_count += 1
+    not_found_students = [student_id for student_id in student_ids if student_id not in found_students_set]  # 找出在所有文件中都没有找到的学生
+    not_found_count = len(not_found_students)
+    for student_id in not_found_students:
+        print_to_text(output_text, f"学生学号: {student_id} 在所有文件中都没有找到")
     if error_count > 0:
         print_to_text(output_text, f'有{error_count}个文件无法处理')
+    if not_found_count > 0:
+        print_to_text(output_text, f'有{not_found_count}个学生没有找到')
     if issue_count == 0:
         print_to_text(output_text, '全部通过')
     else:
