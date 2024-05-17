@@ -55,5 +55,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: dist/*
-          draft: true
+          draft: false
+          prerelease: false
+          make_latest: true
           token: ${{ secrets.GHCR_PAT }}
