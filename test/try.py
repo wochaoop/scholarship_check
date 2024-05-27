@@ -1,15 +1,16 @@
 import os
+import re
 import tkinter as tk
 import warnings
 from tkinter import filedialog
 
 import pandas as pd
-import xlrd
 
 warnings.filterwarnings('ignore', category=UserWarning)
 
 summary_files = []
-summary_data = ''
+summary_data = pd.DataFrame(columns=["姓名", "学号", "班级"])
+header = 0
 
 
 def save_summary_path(path):
@@ -24,28 +25,20 @@ def save_summary_path(path):
 
 
 def open_summary():
-    global summary_data
+    global summary_data, header
     folder_summary = filedialog.askdirectory()
     if not folder_summary:
         print("没有选择文件")
         return
     save_summary_path(folder_summary)
-    for path in summary_files:
-        print(path)
-
-        header = 0
-
-        find_header = pd.read_excel(path, nrows=10)
-        for index, rows in find_header.iterrows():
-            if '序号' in rows.values:
+    for file_path in summary_files:
+        print(file_path)
+        header_data = pd.read_excel(file_path)
+        for index, row in header_data.iterrows():
+            if "序号" in row.values:
                 header = index
-
-        # try:
-        #     data = pd.read_excel(path, header=header)
-        #     print(data['学号'].astype(int))
-        #     print(data['班级'].astype(str))
-        # except Exception as e:
-        #     print(e)
+        file_data = pd.read_excel(file_path, header=header+1)
+        print(file_data["学号"])
 
 
 window = tk.Tk()
