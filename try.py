@@ -4,6 +4,7 @@ import warnings
 from tkinter import filedialog
 
 import pandas as pd
+import xlrd
 
 warnings.filterwarnings('ignore', category=UserWarning)
 
@@ -19,7 +20,7 @@ def save_summary_path(path):
             if file.endswith(".xlsx") or file.endswith(".xls") or file.endswith(".xlsm") or file.endswith(".xlsb"):
                 summary_files.append(os.path.join(path, file))
             else:
-                print(file,'不是一个表格文件')
+                print(file, '不是一个表格文件')
 
 
 def open_summary():
@@ -30,12 +31,21 @@ def open_summary():
         return
     save_summary_path(folder_summary)
     for path in summary_files:
-        try:
-            data = pd.read_excel(path, header=5)
-            print(data['学号'].astype(int))
-            print(data['班级'].astype(str))
-        except Exception as e:
-            print(e)
+        print(path)
+
+        header = 0
+
+        find_header = pd.read_excel(path, nrows=10)
+        for index, rows in find_header.iterrows():
+            if '序号' in rows.values:
+                header = index
+
+        # try:
+        #     data = pd.read_excel(path, header=header)
+        #     print(data['学号'].astype(int))
+        #     print(data['班级'].astype(str))
+        # except Exception as e:
+        #     print(e)
 
 
 window = tk.Tk()
