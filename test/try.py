@@ -32,13 +32,15 @@ def open_summary():
         return
     save_summary_path(folder_summary)
     for file_path in summary_files:
-        print(file_path)
         header_data = pd.read_excel(file_path)
         for index, row in header_data.iterrows():
-            if "序号" in row.values:
+            if "学号" in row.values:
                 header = index
         file_data = pd.read_excel(file_path, header=header+1)
-        print(file_data["学号"])
+        filtered_rows = file_data[~pd.isna(file_data["学号"])]
+        summary_data = pd.concat([summary_data, filtered_rows[["姓名", "学号", "班级"]]], ignore_index=True)
+    print(summary_data)
+    summary_data.to_excel('汇总数据.xlsx', index=False)
 
 
 window = tk.Tk()
