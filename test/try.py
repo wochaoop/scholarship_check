@@ -137,19 +137,21 @@ def open_gpa():
 # 开始进行核查操作
 def check():
     global summary_data, gpa_files
-    a = []
+    success_student = pd.DataFrame(columns=['学号', '班级', '姓名'])
+    rows_to_drop = []
     total = 0
     for gpa_file_path in gpa_files:  # 循环保存好的 gpa_files 字典数据，根据每一项的路径读取该文件
         gpa_data = pd.read_excel(gpa_file_path, header=0)
         grade = remove_parentheses_and_contents(gpa_data['班级'].iloc[0])
         filtered_data = summary_data.loc[summary_data['班级'] == grade]
-        total += len(filtered_data)
-        print(grade, len(filtered_data))
         if len(filtered_data) == 0:
             print('============请检查', grade, '在各班汇总表中的写法是否符合绩点文件中的写法===========')
         else:
-            print(filtered_data)
-    print(total)
+            success_student = pd.concat([success_student, filtered_data], ignore_index=True)
+            rows_to_drop.extend(filtered_data.index.tolist())
+    print(success_student)
+    summary_data = summary_data.drop(rows_to_drop)
+    print(summary_data, '这些数据是含有问题的数据')
 
 
 window = tk.Tk()
