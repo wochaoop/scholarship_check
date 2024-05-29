@@ -33,7 +33,10 @@ def process_student_id(student_id):
     if isinstance(student_id, float):  # 如果数据格式为浮点数，则给他先转为整数再转为字符串
         student_id = int(student_id)
     if isinstance(student_id, str):  # 如果数据格式为字符串，则需要给他去除首尾空格
-        student_id = int(student_id.strip())
+        try:
+            student_id = int(student_id.strip())
+        except ValueError:
+            print(student_id, '不符合基本学号的格式,请处理')
     return student_id
 
 
