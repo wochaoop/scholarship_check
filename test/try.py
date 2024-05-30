@@ -87,6 +87,7 @@ def standardize_grade(grade):
 # 然后根据文件路径，将所有的姓名、学号、班级信息汇总成一个字典 summary_data
 def open_summary():
     global summary_data, header
+    summary_data = pd.DataFrame(columns=["学号", "班级", "姓名"])  # 清空上一次运行的数据
     folder_summary = filedialog.askdirectory()  # 打开文件选择器，让用户选择文件夹
     if not folder_summary:
         print("没有选择文件")  # 若用户未打开文件夹，则显示报错，并 return 出函数
@@ -109,7 +110,7 @@ def open_summary():
     summary_data['班级'] = summary_data['班级'].apply(process_grade)
     summary_data['班级'] = summary_data['班级'].apply(remove_parentheses_and_contents)
     summary_data['班级'] = summary_data['班级'].apply(standardize_grade)
-    print(summary_data)
+    print('==========================各班汇总中共有：', len(summary_data), '位学生=================================')
 
 
 # 这个函数和上面的 save_summary_path 函数的效果是一样的
@@ -128,13 +129,16 @@ def save_gpa_path(path):
 # 打开绩点文件夹，保存绩点文件中的 excel 表格的路径
 def open_gpa():
     global gpa_files
+    gpa_files = []  # 清空上一次的处理数据
     folder_gpa = filedialog.askdirectory()  # 打开文件选择器，让用户选择文件夹
     if not folder_gpa:  # 若用户未选择文件，则弹出报错
         print("没有选择文件")
         return
     save_gpa_path(folder_gpa)
     # 使用 save_gpa_path 函数将文件夹中的所有 excel 文件的路径保存到 gpa_files 字典中
-    print(gpa_files)
+    for file_path in gpa_files:
+        print(file_path)
+    print('===============================已上传以上绩点文件========================================')
 
 
 # 开始进行核查操作
@@ -147,14 +151,41 @@ def check():
         gpa_data = pd.read_excel(gpa_file_path, header=0)
         grade = remove_parentheses_and_contents(gpa_data['班级'].iloc[0])
         filtered_data = summary_data.loc[summary_data['班级'] == grade]
+        for index, row in filtered_data.iterrows():
+            for index2, row2 in gpa_data.iterrows():
+                if row['学号'] == row2['学号']:
+                    if row['姓名'] != row2['姓名']:
+                        print('汇总表中的数据:', row['学号'], row['班级'], row['姓名'])
+                        print('绩点表中的数据:', row2['学号'], row2['班级'], row2['姓名'])
+                        print('============该学生的数据出现异常==========')
+                        total = total + 1
         if len(filtered_data) == 0:
             print('============请检查', grade, '在各班汇总表中的写法是否符合绩点文件中的写法===========')
         else:
             success_student = pd.concat([success_student, filtered_data], ignore_index=True)
             rows_to_drop.extend(filtered_data.index.tolist())
-    print(success_student)
     summary_data = summary_data.drop(rows_to_drop)
-    print(summary_data, '这些数据是含有问题的数据')
+    if len(summary_data) != 0:
+        print('=============这些数据是含有问题的数据,请手动处理之后重新上传各班汇总文件后再次执行==========')
+        print(summary_data)
+        return
+    if total != 0:
+        print('============汇总表中出现学号或姓名填错的情况,请手动处理后重新上传各班汇总文件后再次执行=========')
+        return
+
+
+def check_student_id():
+    global gpa_files
+    result = int(entry.get())
+    students = pd.DataFrame()
+    for gpa_file_path in gpa_files:
+        gpa_data = pd.read_excel(gpa_file_path, header=0, index_col='学号')
+        students = pd.concat([students, gpa_data], ignore_index=False)
+    if result in students.index:
+        student_info = students.loc[result][['班级', '姓名']]
+        print('该学生信息为:', student_info['班级'], student_info['姓名'])
+    else:
+        print('未找到该学生')
 
 
 window = tk.Tk()
@@ -169,5 +200,11 @@ button2.pack()
 
 button3 = tk.Button(text="核查", command=lambda: check())
 button3.pack()
+
+entry = tk.Entry()
+entry.pack()
+
+button4 = tk.Button(text="核查学号", command=lambda: check_student_id())
+button4.pack()
 
 window.mainloop()
