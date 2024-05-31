@@ -149,16 +149,22 @@ def check():
     total = 0
     for gpa_file_path in gpa_files:  # 循环保存好的 gpa_files 字典数据，根据每一项的路径读取该文件
         gpa_data = pd.read_excel(gpa_file_path, header=0)
-        grade = remove_parentheses_and_contents(gpa_data['班级'].iloc[0])
-        filtered_data = summary_data.loc[summary_data['班级'] == grade]
+        file_grade = remove_parentheses_and_contents(gpa_data['班级'].iloc[0])
+        filtered_data = summary_data.loc[summary_data['班级'] == file_grade]
         for index, row in filtered_data.iterrows():
+            state = 0
             for index2, row2 in gpa_data.iterrows():
                 if row['学号'] == row2['学号']:
+                    state = 1
                     if row['姓名'] != row2['姓名']:
+                        print('=======================================================================')
                         print('汇总表中的数据:', row['学号'], row['班级'], row['姓名'])
                         print('绩点表中的数据:', row2['学号'], row2['班级'], row2['姓名'])
-                        print('============该学生的数据出现异常==========')
+                        print('===========================该学生的数据出现异常=========================')
                         total = total + 1
+            if state == 0:
+                print('==============汇总表中的数据:', row['学号'], row['班级'], row['姓名'], '在'+file_grade+'这张绩点表中没有找到==============')
+                total = total + 1
         if len(filtered_data) == 0:
             print('============请检查', grade, '在各班汇总表中的写法是否符合绩点文件中的写法===========')
         else:
@@ -166,12 +172,34 @@ def check():
             rows_to_drop.extend(filtered_data.index.tolist())
     summary_data = summary_data.drop(rows_to_drop)
     if len(summary_data) != 0:
-        print('=============这些数据是含有问题的数据,请手动处理之后重新上传各班汇总文件后再次执行==========')
+        print('=============这些学生是班级含有问题的数据,请手动处理之后重新上传各班汇总文件后再次执行==========')
         print(summary_data)
         return
     if total != 0:
-        print('============汇总表中出现学号或姓名填错的情况,请手动处理后重新上传各班汇总文件后再次执行=========')
+        print('============汇总表中出现学号或姓名填错的情况（共' + str(total) + '位）,请手动处理后重新上传各班汇总文件后再次执行=========')
         return
+    if total == 0 and len(summary_data) == 0:
+        print('所有学生都找到了对应数据，开始下一步核查................')
+    student_id = success_student['学号']
+    check_data = pd.DataFrame()
+    for gpa_file_path in gpa_files:
+        gpa_data = pd.read_excel(gpa_file_path, header=0, index_col='学号')
+        check_data = pd.concat([check_data, gpa_data], ignore_index=False)
+    student_number = 0
+    for student in student_id:
+        student_info = check_data.loc[student]
+        for column in student_info.index:
+            if pd.notna(student_info[column]):
+                match = re.search(r'\[(\d+)]$', column)
+                if match:
+                    if student_info[column] in ['优秀', '良好']:
+                        student_info[column] = 80
+                    if student_info[column] in ['合格', '及格']:
+                        student_info[column] = 60
+                    if student_info[column] < 70:
+                        print(student_info['班级'], student_info['姓名'], column, student_info[column], '不合格')
+                        student_number = student_number + 1
+    print('检测出：' + str(student_number) + '条有误数据')
 
 
 def check_student_id():
@@ -186,6 +214,19 @@ def check_student_id():
         print('该学生信息为:', student_info['班级'], student_info['姓名'])
     else:
         print('未找到该学生')
+
+
+def check_student_name_and_grade():
+    global gpa_files
+    name_str = name.get()
+    grade_str = grade.get()
+    for gpa_file_path in gpa_files:
+        gpa_data = pd.read_excel(gpa_file_path, header=0)
+        file_grade = remove_parentheses_and_contents(gpa_data['班级'].iloc[0])
+        if grade_str == file_grade:
+            for index, row in gpa_data.iterrows():
+                if row['姓名'] == name_str:
+                    print(row['学号'], row['班级'], row['姓名'])
 
 
 window = tk.Tk()
@@ -206,5 +247,14 @@ entry.pack()
 
 button4 = tk.Button(text="核查学号", command=lambda: check_student_id())
 button4.pack()
+
+name = tk.Entry()
+name.pack()
+
+grade = tk.Entry()
+grade.pack()
+
+button5 = tk.Button(text="核查班级和学号", command=lambda: check_student_name_and_grade())
+button5.pack()
 
 window.mainloop()
