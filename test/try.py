@@ -195,33 +195,16 @@ def check():
         for column in student_info.index:
             match = re.search(r'\[(\d+)]$', column)
             if match:
-                if '选修' in column:
-                    elective_exists = True
-                    if not pd.isna(student_info[column]):
-                        elective_chosen = True
-                        if isinstance(student_info[column], str):
-                            if student_info[column] in ['合格', '及格', '不及格']:
-                                print(student_info['班级'], student_info['姓名'], column, student_info[column],
-                                      '不合格')
-                                student_number = student_number + 1
-                        if isinstance(student_info[column], float):
-                            if student_info[column] < 70:
-                                print(student_info['班级'], student_info['姓名'], column, student_info[column], '不合格')
-                                student_number = student_number + 1
-                else:
-                    if not pd.isna(student_info[column]):
-                        if isinstance(student_info[column], str):
-                            if student_info[column] in ['合格', '及格', '不及格']:
-                                print(student_info['班级'], student_info['姓名'], column, student_info[column],
-                                      '不合格')
-                                student_number = student_number + 1
-                        if isinstance(student_info[column], float):
-                            if student_info[column] < 70:
-                                print(student_info['班级'], student_info['姓名'], column, student_info[column], '不合格')
-                                student_number = student_number + 1
-                    else:
-                        print(student_info['班级'], student_info['姓名'], '该学生的' + column + '分数为空')
-                        student_number = student_number + 1
+                if not pd.isna(student_info[column]):
+                    if isinstance(student_info[column], str):
+                        if student_info[column] in ['合格', '及格', '不及格']:
+                            print(student_info['班级'], student_info['姓名'], column, student_info[column],
+                                  '不合格')
+                            student_number = student_number + 1
+                    if isinstance(student_info[column], float):
+                        if student_info[column] < 70:
+                            print(student_info['班级'], student_info['姓名'], column, student_info[column], '不合格')
+                            student_number = student_number + 1
         if elective_exists and not elective_chosen:
             print(student_info['班级'], student_info['姓名'], '该学生的选修科目没有分数')
     print('检测出：' + str(student_number) + '条有误数据')
