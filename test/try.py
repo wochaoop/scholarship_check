@@ -163,7 +163,8 @@ def check():
                         print('===========================该学生的数据出现异常=========================')
                         total = total + 1
             if state == 0:
-                print('==============汇总表中的数据:', row['学号'], row['班级'], row['姓名'], '在'+file_grade+'这张绩点表中没有找到==============')
+                print('==============汇总表中的数据:', row['学号'], row['班级'], row['姓名'],
+                      '在' + file_grade + '这张绩点表中没有找到==============')
                 total = total + 1
         if len(filtered_data) == 0:
             print('============请检查', grade, '在各班汇总表中的写法是否符合绩点文件中的写法===========')
@@ -176,7 +177,8 @@ def check():
         print(summary_data)
         return
     if total != 0:
-        print('============汇总表中出现学号或姓名填错的情况（共' + str(total) + '位）,请手动处理后重新上传各班汇总文件后再次执行=========')
+        print('============汇总表中出现学号或姓名填错的情况（共' + str(
+            total) + '位）,请手动处理后重新上传各班汇总文件后再次执行=========')
         return
     if total == 0 and len(summary_data) == 0:
         print('所有学生都找到了对应数据，开始下一步核查................')
@@ -188,17 +190,40 @@ def check():
     student_number = 0
     for student in student_id:
         student_info = check_data.loc[student]
+        elective_exists = False  # 用于跟踪是否存在选修科目
+        elective_chosen = False  # 用于跟踪学生是否选择了至少一个选修科目
         for column in student_info.index:
-            if pd.notna(student_info[column]):
-                match = re.search(r'\[(\d+)]$', column)
-                if match:
-                    if student_info[column] in ['优秀', '良好']:
-                        student_info[column] = 80
-                    if student_info[column] in ['合格', '及格']:
-                        student_info[column] = 60
-                    if student_info[column] < 70:
-                        print(student_info['班级'], student_info['姓名'], column, student_info[column], '不合格')
+            match = re.search(r'\[(\d+)]$', column)
+            if match:
+                if '选修' in column:
+                    elective_exists = True
+                    if not pd.isna(student_info[column]):
+                        elective_chosen = True
+                        if isinstance(student_info[column], str):
+                            if student_info[column] in ['合格', '及格', '不及格']:
+                                print(student_info['班级'], student_info['姓名'], column, student_info[column],
+                                      '不合格')
+                                student_number = student_number + 1
+                        if isinstance(student_info[column], float):
+                            if student_info[column] < 70:
+                                print(student_info['班级'], student_info['姓名'], column, student_info[column], '不合格')
+                                student_number = student_number + 1
+                else:
+                    if not pd.isna(student_info[column]):
+                        if isinstance(student_info[column], str):
+                            if student_info[column] in ['合格', '及格', '不及格']:
+                                print(student_info['班级'], student_info['姓名'], column, student_info[column],
+                                      '不合格')
+                                student_number = student_number + 1
+                        if isinstance(student_info[column], float):
+                            if student_info[column] < 70:
+                                print(student_info['班级'], student_info['姓名'], column, student_info[column], '不合格')
+                                student_number = student_number + 1
+                    else:
+                        print(student_info['班级'], student_info['姓名'], '该学生的' + column + '分数为空')
                         student_number = student_number + 1
+        if elective_exists and not elective_chosen:
+            print(student_info['班级'], student_info['姓名'], '该学生的选修科目没有分数')
     print('检测出：' + str(student_number) + '条有误数据')
 
 
