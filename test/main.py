@@ -106,7 +106,7 @@ def open_summary_files():
     save_file_path(folder_summary, summary_files)
     read_summary_files_data()
     # 统计输出读取到的学生数据
-    print('总共读取到' + str(len(summary_data)) + '位学生数据', )
+    print('总共读取到' + str(len(summary_data)) + '位学生数据')
 
 
 open_summary_files()
