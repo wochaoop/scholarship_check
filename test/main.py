@@ -11,6 +11,8 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 
 summary_files = []  # 存储各班汇总表文件夹中的表格路径
 summary_data = pd.DataFrame(columns=['学号', '班级', '姓名'])  # 存储从各班汇总表中读取的数据，避免保存学生身份证号等敏感信息
+gpa_files = []  # 存储绩点文件夹中的表格路径
+success_student = pd.DataFrame(columns=['学号', '班级', '姓名'])  # 上传绩点文件之后，将从汇总文件读取的学生数据与汇总文件进行比对，核对成功的数据保存到这个变量中
 
 
 # 汇总文件中的学号数据有的为浮点类型，有的为字符串类型，这时候需要把它们全部转变为整形，以便后面的与绩点文件中的数据做读取
@@ -99,14 +101,68 @@ def save_file_path(path, save_path):
 
 def open_summary_files():
     folder_summary = os.path.abspath('../data/2024年春校内奖学金/各班汇总表')  # 在开发过程中写一个固定的路径，方便我们使用
-    # folder_summary = filedialog.askopenfilename()  # 打开文件选择器，让用户自主选择各班汇总文件所在的文件路径
+    # folder_summary = filedialog.askdirectory()  # 打开文件夹选择器，让用户自主选择各班汇总文件夹所在的文件路径
     if not folder_summary:  # 如果用户未选择任何文件夹，则显示报错，并 return 出该函数
-        print('为选择文件')
+        print('未选择文件夹')
         return
-    save_file_path(folder_summary, summary_files)
-    read_summary_files_data()
+    save_file_path(folder_summary, summary_files)  # 调用配置好的函数将 folder_summary 的子表格文件存储到 summary_files 中
+    read_summary_files_data()  # 读取汇总文件夹中的所有学生信息
     # 统计输出读取到的学生数据
     print('总共读取到' + str(len(summary_data)) + '位学生数据')
 
 
+# 核查汇总表中的学生是否在绩点文件中都能找到，确保班级、姓名、学号信息无误
+def check_student_exist():
+    global summary_data, gpa_files, success_student
+    check_fail_student_id = pd.DataFrame(columns=['学号', '班级', '姓名'])  # 保存学号核对不上的学生数据
+    check_fail_student_name = pd.DataFrame(columns=['学号', '班级', '姓名'])  # 保存姓名核对不上的学生数据
+    gpa_student_name = pd.DataFrame(columns=['学号', '班级', '姓名'])  # 由于学生姓名核对不上可能会出现两种情况，所以这个时候保存以下绩点文件中的准确数据，方便用户做比对
+    fail_student_number = 0  # 保存核对失败的学生数量
+    for gpa_file in gpa_files:  # 循环保存好的 gpa_files 字典数据，根据每一项的路径读取该文件
+        gpa_data = pd.read_excel(gpa_file, header=0)  # 读取表格中的数据
+        file_class = process_student_class(gpa_data['班级'].iloc[0])  # 确认本次循环读取的表格是那个班级的绩点数据
+        process_student = summary_data.loc[summary_data['班级'] == file_class]  # 将属于这个班级的学生数据读取出来，单独处理
+        # 此处已比对班级数据
+        summary_data = summary_data.drop(process_student.index.tolist())  # 将每一次班级匹配上的数据从 summary_data 中删除，最后剩下的数据就是班级有问题的数据
+        for index, row in process_student.iterrows():  # 循环这个班级的学生数据
+            state = False  # 定义一个变量来判断该学生的学号是否在该班级中找到
+            # 内部循环该班级的绩点文件，实现双层循环
+            for index2, row2 in gpa_data.iterrows():
+                if row['学号'] == row2['学号'] and row['姓名'] != row2['姓名']:  # 当出现学号匹配对但是姓名不对的情况，有可能是学号写错或姓名写错，这时候要将错误信息和绩点中的数据都保存起来，方便做比对
+                    check_fail_student_name = pd.concat([check_fail_student_name, pd.DataFrame(row).T], ignore_index=True)
+                    gpa_student_name = pd.concat([gpa_student_name, pd.DataFrame(row2[['学号', '班级', '姓名']]).T], ignore_index=True)
+                if row['学号'] == row2['学号']:
+                    state = True  # 将可以学号查询通过的学生做一个标记，以排查根据学号查找不到的数据
+            if not state:
+                # 将通过学号未查询到的数据保存起来
+                check_fail_student_id = pd.concat([check_fail_student_id, pd.DataFrame(row).T], ignore_index=True)
+    fail_student_number = len(check_fail_student_id) + len(check_fail_student_name) + len(summary_data)
+    print('======================有' + str(fail_student_number) + '位学生数据出现问题，请处理==================')
+    for index in check_fail_student_name.index:
+        print('汇总表数据：', check_fail_student_name.iloc[index]['学号'], check_fail_student_name.iloc[index]['班级'], check_fail_student_name.iloc[index]['姓名'])
+        print('绩点表数据：', gpa_student_name.iloc[index]['学号'], gpa_student_name.iloc[index]['班级'], gpa_student_name.iloc[index]['姓名'])
+        print('')
+    print('================以上为汇总表中姓名出现问题的学生，请检查是否为姓名写错或学号写错========================')
+    for index in check_fail_student_id.index:
+        print(check_fail_student_id.iloc[index]['学号'], check_fail_student_id.iloc[index]['班级'], check_fail_student_id.iloc[index]['姓名'])
+        print('')
+    print('================以上为汇总表中学号出现问题的学生，请检查是否为学号写错========================')
+    for index in summary_data.index:
+        print(summary_data.loc[index]['学号'], summary_data.loc[index]['班级'], summary_data.loc[index]['姓名'])
+        print('')
+    print('================以上为汇总表中班级出现问题的学生，请检查是否为班级写错========================')
+
+
+def open_gpa_files():
+    folder_gpa = os.path.abspath('../data/2023年冬成绩绩点（以此为准）2023-2024-1学期')  # 和上方的方法一样，在开发过程中写一个固定的路径，方便使用
+    # folder_gpa = filedialog.askdirectory()  # 打开文件夹选择器，让用户自主选择绩点文件夹所在的文件路径
+    if not folder_gpa:
+        print('为选择文件夹')
+        return
+    save_file_path(folder_gpa, gpa_files)  # 调用配置好的函数将 folder_gpa 的子表格文件存储到 gpa_files 中
+    check_student_exist()  # 为确保汇总文件中的学生信息准确无误，这里需要核查汇总表中的学生数据是否在绩点文件中都可以找到
+
+
 open_summary_files()
+
+open_gpa_files()
