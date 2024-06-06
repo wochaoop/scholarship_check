@@ -137,20 +137,26 @@ def check_student_exist():
                 # 将通过学号未查询到的数据保存起来
                 check_fail_student_id = pd.concat([check_fail_student_id, pd.DataFrame(row).T], ignore_index=True)
     fail_student_number = len(check_fail_student_id) + len(check_fail_student_name) + len(summary_data)
-    print('======================有' + str(fail_student_number) + '位学生数据出现问题，请处理==================')
-    for index in check_fail_student_name.index:
-        print('汇总表数据：', check_fail_student_name.iloc[index]['学号'], check_fail_student_name.iloc[index]['班级'], check_fail_student_name.iloc[index]['姓名'])
-        print('绩点表数据：', gpa_student_name.iloc[index]['学号'], gpa_student_name.iloc[index]['班级'], gpa_student_name.iloc[index]['姓名'])
-        print('')
-    print('================以上为汇总表中姓名出现问题的学生，请检查是否为姓名写错或学号写错========================')
-    for index in check_fail_student_id.index:
-        print(check_fail_student_id.iloc[index]['学号'], check_fail_student_id.iloc[index]['班级'], check_fail_student_id.iloc[index]['姓名'])
-        print('')
-    print('================以上为汇总表中学号出现问题的学生，请检查是否为学号写错========================')
-    for index in summary_data.index:
-        print(summary_data.loc[index]['学号'], summary_data.loc[index]['班级'], summary_data.loc[index]['姓名'])
-        print('')
-    print('================以上为汇总表中班级出现问题的学生，请检查是否为班级写错========================')
+    if fail_student_number != 0:
+        print('======================有' + str(fail_student_number) + '位学生数据出现问题，请处理==================')
+        for index in check_fail_student_name.index:
+            print('汇总表数据：', check_fail_student_name.iloc[index]['学号'],
+                  check_fail_student_name.iloc[index]['班级'], check_fail_student_name.iloc[index]['姓名'])
+            print('绩点表数据：', gpa_student_name.iloc[index]['学号'], gpa_student_name.iloc[index]['班级'],
+                  gpa_student_name.iloc[index]['姓名'])
+            print('')
+        print('================以上为汇总表中姓名出现问题的学生，请检查是否为姓名写错或学号写错========================')
+        for index in check_fail_student_id.index:
+            print(check_fail_student_id.iloc[index]['学号'], check_fail_student_id.iloc[index]['班级'],
+                  check_fail_student_id.iloc[index]['姓名'])
+            print('')
+        print('================以上为汇总表中学号出现问题的学生，请检查是否为学号写错========================')
+        for index in summary_data.index:
+            print(summary_data.loc[index]['学号'], summary_data.loc[index]['班级'], summary_data.loc[index]['姓名'])
+            print('')
+        print('================以上为汇总表中班级出现问题的学生，请检查是否为班级写错========================')
+    else:
+        print('所有数据准确无误，可以开始核查')
 
 
 def open_gpa_files():
