@@ -8,5 +8,4 @@ out
 gen
 build/
 dist/
-*.spec
 data/
