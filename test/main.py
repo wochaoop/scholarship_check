@@ -165,7 +165,7 @@ def open_gpa_files():
     # folder_gpa = os.path.abspath('../data/2023年冬成绩绩点（以此为准）2023-2024-1学期')  # 和上方的方法一样，在开发过程中写一个固定的路径，方便使用
     folder_gpa = filedialog.askdirectory()  # 打开文件夹选择器，让用户自主选择绩点文件夹所在的文件路径
     if not folder_gpa:
-        print('为选择文件夹')
+        print('未选择文件夹')
         return
     save_file_path(folder_gpa, gpa_files)  # 调用配置好的函数将 folder_gpa 的子表格文件存储到 gpa_files 中
     # check_student_exist()  # 为确保汇总文件中的学生信息准确无误，这里需要核查汇总表中的学生数据是否在绩点文件中都可以找到
