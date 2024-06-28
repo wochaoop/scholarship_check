@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy import create_engine, MetaData, Table, inspect
 import pandas as pd
 from sqlalchemy.orm import collections
 
@@ -11,13 +11,27 @@ database = 'aihpt'
 table_name = 'hrp_card'
 engine = create_engine(f'mysql+pymysql://{user}:{password}@{host}:{port}/{database}')
 
-# 反射表结构
-metadata = MetaData()
-table = Table(table_name, metadata, autoload_with=engine)
+# 检查表是否存在
+inspector = inspect(engine)
+tables = inspector.get_table_names()
+if table_name in tables:
+    # 反射表结构
+    metadata = MetaData()
+    table = Table(table_name, metadata, autoload_with=engine)
 
-# 创建列名映射
-assert isinstance(table.columns, collections.Iterable)
-columns_mapping = {column.comment: column.name for column in table.columns}
+    # 创建列名映射
+    assert isinstance(table.columns, collections.Iterable)
+    columns_mapping = {column.comment: column.name for column in table.columns if column.comment is not None}
+else:
+    # 使用自定义的映射
+    columns_mapping = {
+        '一级分类': 'class1_id',
+        '一级分类名称': 'class1_name',
+        '二级分类': 'class2_id',
+        '二级分类名称': 'class2_name',
+        '科室编号': 'hrp_dept_id',
+        '科室名称': 'hrp_dept_name',
+    }
 
 # 读取Excel文件
 file_path = r'D:\Users\Xiwangly\Documents\固定资产导出报表20240531194957.xls'
