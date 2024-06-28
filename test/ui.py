@@ -21,9 +21,17 @@ class AppWindow(tk.Tk):
         self.original_image = tk.PhotoImage(file="upload.png")
         self.resized_image = self.original_image.subsample(6, 6)
 
-        # 创建带有图片的按钮
-        self.button = tk.Button(self, text="上传汇总文件", image=self.resized_image, compound=tk.LEFT, command=lambda: main.open_gpa_files())
+        # 创建上传绩点文件按钮
+        self.button = tk.Button(self, text="上传绩点文件", image=self.resized_image, compound=tk.LEFT, command=lambda: main.open_gpa_files())
         self.button.pack()
+
+        # 创建上传各班汇总文件按钮
+        self.button2 = tk.Button(self, text="上传各班汇总文件", image=self.resized_image, compound=tk.LEFT, command=lambda: main.open_summary_files())
+        self.button2.pack()
+
+        # 创建开始核查按钮
+        self.button3 = tk.Button(self, text="开始核查", command=lambda: main.check_student_exist())
+        self.button3.pack()
 
 
 if __name__ == "__main__":
