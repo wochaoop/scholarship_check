@@ -1,8 +1,7 @@
 import os
 import re
-
 import pandas as pd
-from tkinter import filedialog
+from PyQt6.QtWidgets import QFileDialog
 
 from utils.ui_operations import print_to_text, clear_text, print_folder_tree
 
@@ -22,7 +21,7 @@ def query_xlsx(path):
 
 def open_file(output_text):
     global student_ids, file_selected
-    file_path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx;*.xls;*.xlsm;*.xlsb")])
+    file_path, _ = QFileDialog.getOpenFileName(filter="Excel files (*.xlsx *.xls *.xlsm *.xlsb)")
     if not file_path:
         print_to_text(output_text, "你没有选择文件")
         return
@@ -49,7 +48,7 @@ def open_file(output_text):
 
 def open_folder(output_text):
     global file_selected
-    folder_path = filedialog.askdirectory()
+    folder_path = QFileDialog.getExistingDirectory()
     if not folder_path:
         print_to_text(output_text, "你没有选择文件夹")
         return

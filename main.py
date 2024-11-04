@@ -1,28 +1,24 @@
-import warnings
+import sys
+from PyQt6.QtWidgets import QApplication
 from concurrent.futures import ThreadPoolExecutor
 from utils.file_operations import open_file, open_folder, query_excel
-from utils.ui_operations import create_window, create_text_widget, create_buttons
+from utils.ui_operations import MainWindow
 
 
 def main():
-    warnings.filterwarnings('ignore', category=UserWarning)
-    root_window = create_window()
-    output_text = create_text_widget(root_window)
+    app = QApplication(sys.argv)
+    window = MainWindow()
 
-    # 创建一个线程池执行器
+    # Create a thread pool executor
     executor = ThreadPoolExecutor(max_workers=3)
 
-    # 将函数和参数传递给executor.submit，它会返回一个Future对象
-    # 这个对象代表了一个计算尚未完成的操作
-    create_buttons(root_window, output_text,
-                   lambda _: executor.submit(open_file, output_text),
-                   lambda _: executor.submit(open_folder, output_text),
-                   lambda _: executor.submit(query_excel, output_text))
+    # Connect buttons to their respective functions using the executor
+    window.button_open_file.clicked.connect(lambda: executor.submit(open_file, window.text_edit))
+    window.button_open_folder.clicked.connect(lambda: executor.submit(open_folder, window.text_edit))
+    window.button_query_csv.clicked.connect(lambda: executor.submit(query_excel, window.text_edit))
 
-    root_window.mainloop()
-
-    # 确保所有的任务都已经完成并且线程池已经被关闭
-    executor.shutdown(wait=True)
+    window.show()
+    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
